@@ -62,6 +62,9 @@ if __name__ == '__main__':
             print('there are multiple folders from '
                   '{month}-{day}-{year}'.format(month=month, day=day,
                                                 year=year))
+        no_matches = []
+        if len(matches) == 0:
+            no_matches = no_matches + ec_folders
         for m in matches:
             if len(ec_folders) > 1:
                 dest_folder = choose_destination(m, ec_folders)
@@ -72,3 +75,5 @@ if __name__ == '__main__':
             print('moving {} to {}'.format(m, dest_folder))
             if not args.dry_run:
                 shutil.move(fp_bhv, fp_ephys)
+    print('there are no matches for:')
+    print(' , '.join(no_matches))
