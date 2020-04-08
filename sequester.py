@@ -13,12 +13,12 @@ def create_parser():
                  '(?P<extra>-.*)')
     parser.add_argument('--file_date', type=str, help='pattern to use for the '
                         'file date string',
-                        default=ep_default)
+                        default=f_default)
     parser.add_argument('--extension', default='\.pl2', type=str,
                         help='extension for files to split on')
     folder_default = '{month}{day}{year}{extra}'
     parser.add_argument('--folder_string', type=str, help='pattern to use for '
-                        'each folder name', default=bhv_default)
+                        'each folder name', default=folder_default)
     parser.add_argument('--dry_run', action='store_true', default=False,
                         help='perform a dry run without any actual '
                         'file movements')
@@ -37,10 +37,10 @@ if __name__ == '__main__':
             mdye = m.group('month', 'day', 'year', 'extra')
             if mdye in ephys_dict.keys():
                 mdye[-1] = mdye[-1] + '{}'.format(fi)
-            ephys_dirs[mdye] = ec
+            ephys_dict[mdye] = ec
 
-    for (month, date, year, extra), fn in ephys_dict.items():
-        dirname = args.folder_string.format(month=month, date=date, year=year,
+    for (month, day, year, extra), fn in ephys_dict.items():
+        dirname = args.folder_string.format(month=month, day=day, year=year,
                                             extra=extra)
         makepath = os.path.join(args.dest, dirname)
         filepath = os.path.join(use_dir, fn)
