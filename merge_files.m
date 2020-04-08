@@ -6,6 +6,9 @@ dirFlags = [files.isdir];
 merge_folders = files(dirFlags);
 
 cacheLocation = fullfile(folder, '.merging_cache.mat');
+maxTries = 5;
+devThr = 10;
+
 if ~isempty(use_cache) && use_cache
     cache = load(cacheLocation);
 else
@@ -20,7 +23,7 @@ for folderInd = 1:length(merge_folders)
         imglogFile = cache.(subfolder).imglogFile;
         eventsFile = cache.(subfolder).eventsFile;
         saveFile = cache.(subfolder).saveFile;
-        nexOffset = cache.(subfolder).nex_offset
+        nexOffset = cache.(subfolder).nex_offset;
     else
         [bhvFile, ephysFile, imglogFile, eventsFile, ...
          saveFile] = getFiles(folder, subfolder);
@@ -29,12 +32,21 @@ for folderInd = 1:length(merge_folders)
         cache.(subfolder).ephysFile = ephysFile;
         cache.(subfolder).imglogFile = imglogFile;
         cache.(subfolder).eventsFile = eventsFile;
-        cache.(subfolder).saveFile = saveFile;
-        cache.(subfolder).nexOffset = nexOffset;        
+        cache.(subfolder).saveFile = saveFile;       
     end
-    [data, dev] = opendatafile_bhv_ephys(ephysFile, bhvFile, readLFP,...
-                                         readWaveforms, saveFile, imglogFile,...
-                                         nexOffset, eventsFile);
+    dev = devThr + 1;
+    tryCount = 0;
+    while dev > devThr && tryCount < maxTries
+        tryCount = tryCount + 1;
+        [~, diffs] = opendatafile_bhv_ephys(ephysFile, bhvFile, readLFP,...
+                                            readWaveforms, saveFile, imglogFile,...
+                                            nexOffset, eventsFile);
+        dev = max(abs(diffs));
+        if dev > devThr
+            nexOffset = nexOffset + 1;
+        end
+    end
+    cache.(subfolder).nexOffset = nexOffset; 
 end
 save(cacheLocation, '-struct', 'cache');
 end

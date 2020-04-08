@@ -1,5 +1,5 @@
-function data = opendatafile_bhv_ephys(nex_file, bhvfile, readLFP, readWaveforms, save_file, ...
-    imglog, nex_offset, eventsFile)
+function [data, durdiff] = opendatafile_bhv_ephys(nex_file, bhvfile, readLFP, ...
+    readWaveforms, save_file, imglog, nex_offset, eventsFile)
 %May select either a bhv or a nex file, this program will load that file
 %along with the corresponding nex or bhv file (file names must be
 %identical).  Must call this function before calling nexgetspike.
@@ -14,7 +14,6 @@ verify = 1;
 only_waveform_means = 1; % save just the waveform means, not all the waveforms
 only_good = 1;
 
-knownfiles = {'nex'};
 BHV = [];
 NEURO = [];
 
