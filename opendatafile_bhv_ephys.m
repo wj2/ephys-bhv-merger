@@ -4,10 +4,11 @@ function data = opendatafile_bhv_ephys(nex_file, bhvfile, readLFP, readWaveforms
 %along with the corresponding nex or bhv file (file names must be
 %identical).  Must call this function before calling nexgetspike.
 %
-%Created by     WA, June, 2008
-%Modified by AS, July, 2009
+% Created by  WA,  June, 2008
+% Modified by AS,  July, 2009
 % Modified by NYM, 2013s
-% Modified by KM, January 7, 2015
+% Modified by KM,  January 7, 2015
+% Modified by WJJ, Spring 2020
 
 verify = 1;
 only_waveform_means = 1; % save just the waveform means, not all the waveforms
