@@ -16,7 +16,9 @@ automatic sorting with Kilosort2 and merging into a single mat file.
 **sequester.py** -- meant to be run on a folder containing the electrophysiology
 files. It will put each file in its own folder according to its date and any
 extra information. See
-    python sequester.py --help
+```
+python sequester.py --help
+```
 for usage information.
 
 **match_files.py** -- meant to be run on a folder containing subfolders for each
@@ -24,7 +26,9 @@ electrophysiological recording as well as an additional folder with all
 behavioral data. It will match each behavioral file to the electrophysiological
 sessions that could correspond to it, and ask for user input on any ambiguities.
 See
-    python match_files.py --help
+```
+python match_files.py --help
+```
 for usage information.
 
 **merge_files.m** -- meant to be run on a folder containing subfolders
