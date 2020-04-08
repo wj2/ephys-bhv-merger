@@ -5,8 +5,9 @@ files(ismember({files.name}, {'.', '..'})) = [];
 dirFlags = [files.isdir];
 merge_folders = files(dirFlags);
 
-if ~isempty(use_cache)
-    cache = load(use_cache);
+cacheLocation = fullfile(folder, '.merging_cache.mat');
+if ~isempty(use_cache) && use_cache
+    cache = load(cacheLocation);
 else
     cache = [];
 end
@@ -14,17 +15,32 @@ end
 for folderInd = 1:length(merge_folders)
     subfolder = merge_folders(folderInd);
     if use_cache && contains(subfolder, cache)
-        bhvFile = cache.subfolder.bhvFile;
+        bhvFile = cache.(subfolder).bhvFile;
+        ephysFile = cache.(subfolder).ephysFile;
+        imglogFile = cache.(subfolder).imglogFile;
+        eventsFile = cache.(subfolder).eventsFile;
+        saveFile = cache.(subfolder).saveFile;
+        nexOffset = cache.(subfolder).nex_offset
     else
-        [bhvFile, ephysFile, imglogFile, eventsFile, save_file] = getFiles(folder, subfolder);
-        nex_offset = 0;
+        [bhvFile, ephysFile, imglogFile, eventsFile, ...
+         saveFile] = getFiles(folder, subfolder);
+        nexOffset = 0;
+        cache.(subfolder).bhvFile = bhvFile;
+        cache.(subfolder).ephysFile = ephysFile;
+        cache.(subfolder).imglogFile = imglogFile;
+        cache.(subfolder).eventsFile = eventsFile;
+        cache.(subfolder).saveFile = saveFile;
+        cache.(subfolder).nexOffset = nexOffset;        
     end
-    opendatafile_sdmst_plt(ephysFile, bhvFile, readLFP, readWaveforms,...
-        save_file, imglogFile, nex_offset, eventsFile);
+    [data, dev] = opendatafile_bhv_ephys(ephysFile, bhvFile, readLFP,...
+                                         readWaveforms, saveFile, imglogFile,...
+                                         nexOffset, eventsFile);
 end
+save(cacheLocation, '-struct', 'cache');
 end
 
-function [bhvFile, ephysFile, imglogFile, eventsFile, save_file] = getFiles(folder, subfolder)
+function [bhvFile, ephysFile, imglogFile, eventsFile, ...
+          save_file] = getFiles(folder, subfolder)
 bhvExtension = '.*\.bhv2?';
 bhvNarrower = '.*TASK.*';
 ephysNex = '.*\.nex';
