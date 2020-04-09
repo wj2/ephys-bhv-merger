@@ -131,7 +131,8 @@ for i = 1:length(options)
     optText{i} = strcat(choiceStr, num2str(i), ' ', options(i));
 end
 optionStr = join(optText, ' | ');
-fprintf(strcat(optionStr, '\n'));
+s = strcat(optionStr, '\n');
+fprintf(s);
 inp = input('option number: ');
 choice = options(str2int(inp));
 end
