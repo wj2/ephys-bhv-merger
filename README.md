@@ -1,19 +1,39 @@
-usage: match_bhv_to_ephys.py [-h] [--ephys_date EPHYS_DATE]
-                             [--bhv_date BHV_DATE]
-                             [--bhv_extensions BHV_EXTENSIONS [BHV_EXTENSIONS ...]]
-                             [--dry_run]
-                             ephys_dir bhv_dir
+Several scripts and matlab functions for organizing and merging
+Plexon electrophysiology files that have been sorted either by hand
+or with Kilosort2 with MonkeyLogic behavioral files.
 
-assign behavioral files tosame folder as matching ephys data
+#### Dependencies ####
+1. Plexon Matlab SDK
+2. MonkeyLogic
+3. Python 3.6.x
+4. Matlab
 
-positional arguments:
-  ephys_dir             folder with one subfolder per ephys session
-  bhv_dir               folder with all behavioral files
+#### Usage ####
+The two python scripts are meant to be used from the command line and are setup
+to organize the collections of electrophysiology and behavioral files for both
+automatic sorting with Kilosort2 and merging into a single mat file.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --ephys_date EPHYS_DATE
-                        pattern to use for the ephys subdirectory date string
-  --bhv_date BHV_DATE   pattern to use for the ephys subdirectory date string
-  --bhv_extensions BHV_EXTENSIONS [BHV_EXTENSIONS ...]
-  --dry_run             perform a dry run without any actual file movements
+**sequester.py** -- meant to be run on a folder containing the electrophysiology
+files. It will put each file in its own folder according to its date and any
+extra information. See
+```
+python sequester.py --help
+```
+for usage information.
+
+**match_files.py** -- meant to be run on a folder containing subfolders for each
+electrophysiological recording as well as an additional folder with all
+behavioral data. It will match each behavioral file to the electrophysiological
+sessions that could correspond to it, and ask for user input on any ambiguities.
+See
+```
+python match_files.py --help
+```
+for usage information.
+
+**merge_files.m** -- meant to be run on a folder containing subfolders
+constructed with the two scripts above. It will merge the behavioral and
+electrophysiological files into a single file and create the appropriate trial
+structure. This requires MonkeyLogic to be on the Matlab path, to allow the
+reading of bhv files, and the Plexon SDK to be on the Matlab path if using
+hand-sorted nex files.
