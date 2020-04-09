@@ -10,7 +10,7 @@ def create_parser():
     parser.add_argument('dir', type=str, help='folder with constituent files')
     parser.add_argument('dest', type=str, help='destination for each subfolder')
     f_default = ('.*(?P<month>[0-9]{2})(?P<day>[0-9]{2})(?P<year>[0-9]{4})'
-                 '(?P<extra>-.*)')
+                 '(?P<extra>.*)')
     parser.add_argument('--file_date', type=str, help='pattern to use for the '
                         'file date string',
                         default=f_default)
