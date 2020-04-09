@@ -8,35 +8,39 @@ merge_folders = files(dirFlags);
 cacheLocation = fullfile(folder, '.merging_cache.mat');
 maxTries = 5;
 devThr = 10;
+readLFP = 0;
+readWaveforms = 0; 
 
-if ~isempty(use_cache) && use_cache
+if isfile(cacheLocation) && use_cache
     cache = load(cacheLocation);
 else
     cache = [];
 end
 
 for folderInd = 1:length(merge_folders)
-    subfolder = merge_folders(folderInd);
-    if use_cache && contains(subfolder, cache)
-        bhvFile = cache.(subfolder).bhvFile;
-        ephysFile = cache.(subfolder).ephysFile;
-        imglogFile = cache.(subfolder).imglogFile;
-        eventsFile = cache.(subfolder).eventsFile;
-        saveFile = cache.(subfolder).saveFile;
-        nexOffset = cache.(subfolder).nex_offset;
+    subfolder = merge_folders(folderInd).name;
+    subfName = strcat('f', subfolder);
+    if use_cache && isfield(cache, subfName)
+        bhvFile = cache.(subfName).bhvFile;
+        ephysFile = cache.(subfName).ephysFile;
+        imglogFile = cache.(subfName).imglogFile;
+        eventsFile = cache.(subfName).eventsFile;
+        saveFile = cache.(subfName).saveFile;
+        nexOffset = cache.(subfName).nex_offset;
     else
         [bhvFile, ephysFile, imglogFile, eventsFile, ...
          saveFile] = getFiles(folder, subfolder);
         nexOffset = 0;
-        cache.(subfolder).bhvFile = bhvFile;
-        cache.(subfolder).ephysFile = ephysFile;
-        cache.(subfolder).imglogFile = imglogFile;
-        cache.(subfolder).eventsFile = eventsFile;
-        cache.(subfolder).saveFile = saveFile;       
+        cache.(subfName) = [];
+        cache.(subfName).bhvFile = bhvFile;
+        cache.(subfName).ephysFile = ephysFile;
+        cache.(subfName).imglogFile = imglogFile;
+        cache.(subfName).eventsFile = eventsFile;
+        cache.(subfName).saveFile = saveFile;       
     end
     dev = devThr + 1;
     tryCount = 0;
-    while dev > devThr && tryCount < maxTries
+    while dev > devThr && tryCount <= maxTries
         tryCount = tryCount + 1;
         [~, diffs] = opendatafile_bhv_ephys(ephysFile, bhvFile, readLFP,...
                                             readWaveforms, saveFile, imglogFile,...
@@ -44,9 +48,16 @@ for folderInd = 1:length(merge_folders)
         dev = max(abs(diffs));
         if dev > devThr
             nexOffset = nexOffset + 1;
+            fprintf('deviance above threshold %d > %d \n', dev, devThr);
+            if tryCount <= maxTries
+                fprintf('trying again with offset %d \n', nexOffset);
+            end
         end
     end
-    cache.(subfolder).nexOffset = nexOffset; 
+    if dev > devThr
+        fprintf('correct offset was not found \n');
+    end
+    cache.(subfName).nexOffset = nexOffset; 
 end
 save(cacheLocation, '-struct', 'cache');
 end
@@ -59,7 +70,7 @@ ephysNex = '.*\.nex';
 ephysMat = 'rez2\.mat';
 eventsExtension = '.*\events\.mat';
 
-fileNames = dir(strcat(folder, subfolder)).names;
+fileNames = {dir(strcat(folder, subfolder)).name};
 bhvMask = ~cellfun(@isempty, regexpi(fileNames, bhvExtension));
 narrowerMask = ~cellfun(@isempty, regexpi(fileNames, bhvNarrower));
 ephysMask = ~cellfun(@isempty, regexpi(fileNames, ephysNex));
@@ -74,7 +85,7 @@ if sum(conj) ~= 1
     end
 else
     bhvchoice = fileNames(conj);
-    bhvchoice = bhvchoice(1);
+    bhvchoice = bhvchoice{1};
 end
 if sum(ephysMask) > 1
     fprintf('too many nex files in %s \n', subfolder);
@@ -90,13 +101,13 @@ elseif sum(ephysMask) == 0
         return;
     else
         ephyschoice = fileNames(ephysKSMask);
-        ephyschoice = ephyschoice(1);
+        ephyschoice = ephyschoice{1};
         ephysEvents = fileNames(ephysEventsMask);
-        ephysEvents = ephysEvents(1);
+        ephysEvents = ephysEvents{1};
     end
 else
     ephyschoice = fileNames(ephysMask);
-    ephyschoice = ephyschoice(1);
+    ephyschoice = ephyschoice{1};
     ephysEvents = [];
 end
 [path, name, ~] = fileparts(bhvchoice);
@@ -111,7 +122,7 @@ ephysFile = fullfile(folder, subfolder, ephyschoice);
 imglogFile = fullfile(folder, subfolder, imglog);
 eventsFile = fullfile(folder, subfolder, ephysEvents);
 [path, name, ~] = fileparts(ephysFile);
-save_file = fullfile(path, strcat(name, + '_merged.mat'));
+save_file = fullfile(path, strcat(name, '-', subfolder, '_merged.mat'));
 end
 
 function choice = choose_option(options)

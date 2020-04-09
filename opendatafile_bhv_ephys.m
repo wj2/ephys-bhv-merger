@@ -192,6 +192,7 @@ if contains(filetype, 'nex'),
     end
 elseif contains(filetype, 'mat')
     ndata = load(NEURO.File).rez;
+    freq = ndata.ops.fs;
     spiketimes = ndata.st3(:, 1);
     neuronids = ndata.st3(:, 2);
     good_neurons = logical(ndata.good);
@@ -199,7 +200,6 @@ elseif contains(filetype, 'mat')
     if only_good
         uniqueIDs = uniqueIDs(good_neurons);
     end
-    freq = ndata.ops.fs;
     for i = 1:length(uniqueIDs)
         id = uniqueIDs(i);
         label = strcat('CLUSTER', num2str(id));
@@ -207,7 +207,7 @@ elseif contains(filetype, 'mat')
         NEURO.Neuron.(label) = round(1000*spks/freq);
     end
     events = load(eventsFile).Neuro;
-    NEURO.CodeTimes = events.Ts;
+    NEURO.CodeTimes = round(1000*events.Ts);
     NEURO.CodeNumbers = events.Strobed;
 else
     fprintf('filetype %s not recognized.', filetype);
