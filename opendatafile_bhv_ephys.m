@@ -306,6 +306,20 @@ end
 
 if exist('imglog','var')
     data.imglog = imglog;
+    if isfile(imglog)
+        ild = {};
+        ilf = fopen(imglog);
+        i = 1;
+        while 1
+            l = fgets(ilf);
+            if l == -1
+                break;
+            end
+            ild{i} = l;
+            i = i + 1;
+        end   
+    end
+    data.imglog_data = ild;
 end
 
 if save_file
